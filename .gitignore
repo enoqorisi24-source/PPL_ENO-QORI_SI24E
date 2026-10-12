@@ -1,0 +1,16 @@
+# Database lokal
+database/*.sqlite
+database/*.sqlite-journal
+
+# Temporary cookies & logs
+tests/*cookie*.txt
+*.log
+
+# OS generated files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# IDE & Editor files
+.vscode/
+.idea/
