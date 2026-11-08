@@ -1,0 +1,5 @@
+database/*.sqlite
+database/*.sqlite-journal
+tests/
+*.bat
+.git
