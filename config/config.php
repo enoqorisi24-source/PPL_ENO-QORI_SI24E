@@ -4,6 +4,12 @@
  */
 
 if (session_status() === PHP_SESSION_NONE) {
+    if (getenv('VERCEL') || !empty($_ENV['VERCEL'])) {
+        $tmp = sys_get_temp_dir();
+        if (is_dir($tmp) && is_writable($tmp)) {
+            session_save_path($tmp);
+        }
+    }
     session_start();
 }
 

@@ -122,6 +122,21 @@ Aplikasi TaskMate dirancang sangat fleksibel:
 6. Akses aplikasi melalui browser di:
    [http://localhost/taskmate](http://localhost/taskmate)
 
+### Cara 3: Deploy Online ke Vercel (Cloud Serverless)
+
+Proyek ini telah dilengkapi file konfigurasi `vercel.json` dan dukungan serverless runtime:
+1. Buka dashboard [Vercel](https://vercel.com/) dan login menggunakan akun GitHub Anda.
+2. Klik tombol **"Add New..."** -> **"Project"**.
+3. Pilih repository **`PPL_ENO-QORI_SI24E`**, lalu klik **"Import"**.
+4. Biarkan konfigurasi Build & Output Settings default (Vercel otomatis membaca `vercel.json`).
+5. *(Opsional)* Jika ingin menghubungkan ke database MySQL cloud (misal: TiDB Cloud, Aiven, atau Railway MySQL), tambahkan Environment Variables:
+   - `DB_HOST`: Host database cloud
+   - `DB_USER`: Username database
+   - `DB_PASS`: Password database
+   - `DB_NAME`: Nama database
+   *(Jika tidak diset, TaskMate otomatis menggunakan SQLite di direktori `/tmp` serverless).*
+6. Klik **"Deploy"**. Dalam hitungan detik, aplikasi TaskMate Anda telah online di domain `https://*.vercel.app`!
+
 ---
 
 ## 🔑 Akun Demo Pengujian

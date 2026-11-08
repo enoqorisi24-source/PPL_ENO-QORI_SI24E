@@ -13,12 +13,23 @@ class Database {
             return self::$instance;
         }
 
-        // Konfigurasi MySQL default (XAMPP standard)
-        $mysqlHost = '127.0.0.1';
-        $mysqlPort = '3306';
-        $mysqlDb   = 'taskmate';
-        $mysqlUser = 'root';
-        $mysqlPass = '';
+        // Konfigurasi MySQL default (dengan dukungan Environment Variables untuk Cloud / Vercel)
+        $mysqlHost = getenv('DB_HOST') ?: (getenv('MYSQLHOST') ?: '127.0.0.1');
+        $mysqlPort = getenv('DB_PORT') ?: (getenv('MYSQLPORT') ?: '3306');
+        $mysqlDb   = getenv('DB_NAME') ?: (getenv('MYSQLDATABASE') ?: 'taskmate');
+        $mysqlUser = getenv('DB_USER') ?: (getenv('MYSQLUSER') ?: 'root');
+        $mysqlPass = getenv('DB_PASS') !== false ? getenv('DB_PASS') : (getenv('MYSQLPASSWORD') !== false ? getenv('MYSQLPASSWORD') : '');
+
+        // Dukungan format full connection string (DATABASE_URL / JAWSDB_URL)
+        $dbUrl = getenv('DATABASE_URL') ?: getenv('JAWSDB_URL');
+        if ($dbUrl) {
+            $parsed = parse_url($dbUrl);
+            if (!empty($parsed['host'])) $mysqlHost = $parsed['host'];
+            if (!empty($parsed['port'])) $mysqlPort = (string)$parsed['port'];
+            if (!empty($parsed['user'])) $mysqlUser = $parsed['user'];
+            if (isset($parsed['pass'])) $mysqlPass = $parsed['pass'];
+            if (!empty($parsed['path'])) $mysqlDb = ltrim($parsed['path'], '/');
+        }
 
         // Opsi PDO
         $options = [
@@ -97,10 +108,21 @@ class Database {
 
     private static function initSqliteFallback(array $options): PDO {
         $dbDir = dirname(__DIR__) . '/database';
-        if (!is_dir($dbDir)) {
-            mkdir($dbDir, 0777, true);
+        $isVercel = getenv('VERCEL') || !empty($_ENV['VERCEL']);
+
+        // Jika dijalankan di Vercel Serverless atau direktori database tidak bisa ditulisi,
+        // gunakan /tmp yang merupakan satu-satunya direktori writable di Serverless
+        if ($isVercel || (!is_dir($dbDir) && !@mkdir($dbDir, 0777, true)) || !is_writable($dbDir)) {
+            $sqlitePath = sys_get_temp_dir() . '/taskmate.sqlite';
+        } else {
+            $sqlitePath = $dbDir . '/taskmate.sqlite';
         }
-        $sqlitePath = $dbDir . '/taskmate.sqlite';
+
+        $bundledSqlite = $dbDir . '/taskmate.sqlite';
+        if ($sqlitePath !== $bundledSqlite && !file_exists($sqlitePath) && file_exists($bundledSqlite)) {
+            @copy($bundledSqlite, $sqlitePath);
+        }
+
         $isNew = !file_exists($sqlitePath);
 
         $pdo = new PDO("sqlite:{$sqlitePath}", null, null, $options);
