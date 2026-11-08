@@ -14,3 +14,9 @@ desktop.ini
 # IDE & Editor files
 .vscode/
 .idea/
+
+# Temporary scripts
+*git*.bat
+*commit*.bat
+*push*.bat
+
